@@ -80,7 +80,7 @@ const VideoPage = () => {
                 className="col-span-12 lg:col-span-2 w-full"
                 disabled={isLoading}
               >
-                Generate
+                Generateee``
               </Button>
             </form>
           </Form>
