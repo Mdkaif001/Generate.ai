@@ -2,6 +2,9 @@ import { auth } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
 import { ChatCompletionRequestMessage, Configuration, OpenAIApi } from "openai";
 
+import {increaseApiLimit, checkApiLimit} from "@/lib/api-limit"
+import { checkSubscription } from "@/lib/subscriprion";
+
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
 });
@@ -34,11 +37,23 @@ export async function POST(req: Request) {
       return new NextResponse("Resolution is required", { status: 400 });
     }
 
+   
+    const freeTrail = await checkApiLimit();
+    const isPro = await checkSubscription();
+    if(!freeTrail && !isPro){
+      return new NextResponse("Free trail has expired", {status : 403})
+    }
+
     const response = await openai.createImage({
       prompt,
       n: parseInt(amount, 10),
       size: resolution,
     });
+
+    if (!isPro) {
+      await increaseApiLimit();
+    }
+
 
     return NextResponse.json(response.data.data);
   } catch (error) {

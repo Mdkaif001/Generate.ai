@@ -15,8 +15,11 @@ import axios from "axios";
 import { useState } from "react";
 import { Empty } from "@/components/empty";
 import Loader from "@/components/loader";
+import { useProModal } from "@/hooks/use-pro-modal";
+import toast from "react-hot-toast";
 
 const VideoPage = () => {
+  const proModal = useProModal();
   const router = useRouter();
   const [video, setVideo] = useState<string>();
 
@@ -38,8 +41,12 @@ const VideoPage = () => {
       
       setVideo(res?.data[0]);
       form.reset();
-    } catch (error) {
-      console.log(error);
+    } catch (error : any) {
+      if(error?.response?.status === 403){
+        proModal.onOpen();
+      }else{
+        toast.error("Something went wrong")
+      }
     } finally {
       router.refresh();
     }
